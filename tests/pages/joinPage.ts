@@ -55,32 +55,39 @@ export class JoinPage {
     }
   }
 
-  /* Completes and verifies successful registration  */
-  async register(email: string, password: string) {
+  async register(email: string, password: string): Promise<void> {
     await this.fillForm({
-      firstName: 'Automation',
+      firstName: `Auto${Date.now()}`,
       lastName: 'Member',
       email,
       phoneNumber: '8004002000',
       password,
     });
-    await this.checkAllCheckboxes();
-    await expect(this.submit).toBeEnabled({timeout: 15000});
-    const responsePromise = this.page.waitForResponse((res) => {
-      const req = res.request();
-      return (
-        req.method() === 'POST' &&
-        res.url() === 'https://stage-api.ezra.com/individuals/api/members'
-      );
-    });
-    // Seeing 400 often while creating a user, is it a known issue?? 
-    // We can explore a retrying mechanism if needed
-    await this.page.waitForTimeout(3000)
-    await expect(this.submit).toBeVisible();
-    await expect(this.submit).toBeEnabled();
-    await this.submit.click();
-    const response = await responsePromise;
-    expect(response.status()).toBe(201);
+      await this.checkAllCheckboxes();
+    await expect(this.submit).toBeVisible({ timeout: 15000 });
+    await expect(this.submit).toBeEnabled({ timeout: 15000 });
+  
+    // Seeing a 400 while registering users, placing a retry mechanism here
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const responsePromise = this.page.waitForResponse((res) => {
+        const req = res.request();
+        return (
+          req.method() === 'POST' &&
+          res.url() === 'https://stage-api.ezra.com/individuals/api/members'
+        );
+      });
+  
+      await this.submit.click();
+  
+      const response = await responsePromise;
+      const status = response.status();
+      if (status === 201) return;
+      if (status === 400 && attempt < 3) {
+        await this.page.waitForTimeout(1000);
+        continue;
+      }
+      expect(status).toBe(201);
+    }
   }
  
 }

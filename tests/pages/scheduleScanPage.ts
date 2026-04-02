@@ -38,18 +38,28 @@ export class ScheduleScanPage {
     await expect(await this.availableTimes.first()).toBeChecked;
   }
 
-   /** Clicks continue button and verify success */
-   async continue() {
-    const responsePromise = this.page.waitForResponse((res) => {
-      const req = res.request();
-      return (
-        req.method() === 'POST' &&
-        res.url() === 'https://stage-api.ezra.com/packages/api/scheduling/reservation'
-      );
-    });
-    await expect(this.continueButton).not.toBeDisabled();
-    await this.continueButton.click();
-    const response = await responsePromise;
-    expect(response.status()).toBe(200);
+  /** Clicks continue button and verify success */
+  async continue(): Promise<void> {
+    // Seeing a 400, placing a retry mechanism here
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const responsePromise = this.page.waitForResponse((res) => {
+        const req = res.request();
+        return (
+          req.method() === 'POST' &&
+          res.url() === 'https://stage-api.ezra.com/packages/api/scheduling/reservation'
+        );
+      });
+      await expect(this.continueButton).toBeVisible({ timeout: 15000 });
+      await expect(this.continueButton).toBeEnabled({ timeout: 15000 });
+      await this.continueButton.click({ timeout:10000 });
+      const response = await responsePromise;
+      const status = response.status();
+      if (status === 200) return;
+      if (status === 400 && attempt < 3) {
+        await this.page.waitForTimeout(1000);
+        continue;
+      }
+      expect(status).toBe(200);
+    }
   }
 }

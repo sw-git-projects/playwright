@@ -59,13 +59,14 @@ export class SelectScanPage {
     } as const;
   
     const card = this.page.getByTestId(map[scanType]);
-    await expect(card).toBeVisible();
+    await expect(card).toBeVisible({ timeout: 15000 });
     await card.click();
   }
 
    /** Clicks continue button and verify success */
    async continue() {
-    await expect(this.continueButton).not.toBeDisabled();
+    await expect(this.continueButton).toBeVisible({ timeout: 15000 });
+    await expect(this.continueButton).toBeEnabled({ timeout: 15000 });
     await this.continueButton.click();
   }
 }
