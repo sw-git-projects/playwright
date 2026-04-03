@@ -68,6 +68,6 @@ npx playwright test --debug
 
 ## Scalability
 - **Parallelism** — Playwright can run files/workers in parallel
-- **CI** — Use `CI=true` (or your pipeline’s flag) to enable this suite to be used in deployments and releases
+- **CI** — Use `CI=true` to enable this suite to be used in deployments and releases
 
 ---

@@ -15,27 +15,34 @@ export class ScheduleScanPage {
       '.vuecal__cell:not(.vuecal__cell--disabled) .vc-day-content[role="button"]'
     );
     this.availableTimes = this.page.locator(
-      '.appointments__list .appointments__individual-appointment label'
+      '.appointments__list .appointments__individual-appointment label:visible'
     );
     this.continueButton = this.page.locator('button[data-test="submit"]')
   }
 
-  /**  Chooses first location for scan from the list */
-  async pickALocation() {
-    // Picking the first location shown
-    // Edge case some sclinics only have MRI with Spine 
-    // Will need to handled int he future
-    await expect(this.locationCard.first()).toBeVisible();
-    await this.locationCard.first().click();
-  }
+/**  Chooses recommended location for scan from the list */
+async pickALocation() {
+  // Picking the recommended location shown for this POC
+  // Edge cases:
+  //    some clinics only have MRI with Spine can be excluded with '.unavailable-pill' class
+  //    some clinics need three time selections needs to handle the modal and selectiong
+  await expect(this.locationCard.first()).toBeVisible();
+  const recommendedLocation = this.locationCard.filter({
+    has: this.page.locator('.pill', { hasText: 'Recommended' }),
+  });
+  await recommendedLocation.click();}
 
-  /** Picks the first available date and time */
+  /** Picks a random available date and time */
   async pickAvailableValidDateAndTime() {
-    await expect(this.availableDays.first()).toBeVisible({ timeout: 30000 });
-    await this.availableDays.first().click();
-    await expect(this.availableTimes.first()).toBeVisible({ timeout: 30000 });
-    await this.availableTimes.first().click();
-    await expect(await this.availableTimes.first()).toBeChecked;
+    await expect(this.availableDays.first()).toBeVisible({ timeout: 10000 });
+    const randomDayIndex = Math.floor(Math.random() * (await this.availableDays.count()));
+    await this.availableDays.nth(randomDayIndex).click();
+    console.log("Day selected: " + this.availableDays.nth(randomDayIndex).getAttribute('data-testid'));
+    await expect(this.availableTimes.first()).toBeVisible({ timeout: 10000 });
+    const randomTimeIndex = Math.floor(Math.random() * (await this.availableTimes.count()));
+    await this.availableTimes.nth(randomTimeIndex).click();
+    await expect(this.availableTimes.nth(randomTimeIndex)).toBeChecked();
+    // Selected date and time can be returned here and passed to dashbord for assertion.
   }
 
   /** Clicks continue button and verify success */
