@@ -1,4 +1,4 @@
-# Playwright E2E
+# Playwright E2E Implementation for Ezra's booking flow
 
 ## Question 1 Part 1
 
