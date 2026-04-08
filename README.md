@@ -1,7 +1,4 @@
 # Playwright E2E
-This repository contains Playwright end-to-end and integration-style automation for Ezra’s booking flow on staging, structured using the Page Object Model (POM). The implementation focuses on high-value, revenue-critical, and privacy-critical flows, especially around booking, payment, dashboard confirmation, and medical data access protection.
-
----
 
 ## Question 1 Part 1
 
